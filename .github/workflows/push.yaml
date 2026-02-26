@@ -1,0 +1,27 @@
+name: Push undrained
+on:
+  push:
+
+jobs:
+  test:
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Test application
+        run: go test -v ./...
+      - name: Compile application
+        run: go build
+      - name: Dry-run goreleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --snapshot --skip=publish --clean
